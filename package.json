@@ -1,0 +1,45 @@
+{
+  "name": "test-windows-rust",
+  "version": "1.0.0",
+  "description": "- Dependencies:   - [rust win api](https://github.com/microsoft/windows-rs)   - ffplay (windows binary)   - Windows C++ Build tools (as win rust dependencies)",
+  "main": "index.js",
+  "scripts": {
+    "artifacts": "napi artifacts -d packages/backend --dist packages/backend",
+    "bench": "node -r @swc-node/register benchmark/bench.ts",
+    "build": "napi build --platform --release --pipe \"prettier -w\" packages/backend",
+    "build:debug": "napi build --platform --pipe \"prettier -w\"",
+    "format": "run-p format:prettier format:rs",
+    "format:prettier": "prettier . -w",
+    "format:rs": "cargo fmt",
+    "lint": "eslint . -c ./.eslintrc.yml",
+    "prepublishOnly": "napi prepublish -t npm",
+    "test": "ava",
+    "version": "napi version"
+  },
+  "engines": {
+    "node": ">= 14"
+  },
+  "workspaces": [
+    "packages/backend"
+  ],
+  "napi": {
+    "name": "index", 
+    "triples": {
+      "defaults": true
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hlhr202/windows-wallpaper-engine-rust.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hlhr202/windows-wallpaper-engine-rust/issues"
+  },
+  "homepage": "https://github.com/hlhr202/windows-wallpaper-engine-rust#readme",
+  "devDependencies": {
+    "@napi-rs/cli": "^2.0.0-beta.5",
+    "prettier": "^2.5.1"
+  }
+}

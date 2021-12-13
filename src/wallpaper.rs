@@ -1,3 +1,7 @@
+#![deny(clippy::all)]
+
+use napi_derive::napi;
+
 use std::{env, path::PathBuf};
 use windows::{
     core::*,
@@ -6,7 +10,7 @@ use windows::{
     Win32::{System::Threading::*, UI::WindowsAndMessaging::*},
 };
 
-fn run_window(file_path: String) -> Result<bool> {
+fn run_window(file_path: String) -> std::io::Result<bool> {
     let si = STARTUPINFOW {
         cb: std::mem::size_of::<STARTUPINFOW>() as u32,
         ..Default::default()
@@ -87,51 +91,50 @@ unsafe extern "system" fn enum_windows_proc(hwnd: HWND, _lparam: LPARAM) -> BOOL
     return BOOL(1);
 }
 
-fn main() {
-    let args = env::args().nth(1);
-    if let Some(arg) = args {
-        let is_running = run_window(arg).unwrap();
-        if is_running {
-            unsafe {
-                Sleep(300);
+#[napi]
+pub fn set_wallpaper(arg: String) {
+    let is_running = run_window(arg).unwrap();
+    if is_running {
+        unsafe {
+            Sleep(300);
 
-                let h_ffplay = FindWindowW(
-                    "SDL_app",
-                    PWSTR {
-                        ..Default::default()
-                    },
-                );
+            let h_ffplay = FindWindowW(
+                "SDL_app",
+                PWSTR {
+                    ..Default::default()
+                },
+            );
 
-                let h_program = FindWindowW(
-                    "Progman",
-                    PWSTR {
-                        ..Default::default()
-                    },
-                );
+            let h_program = FindWindowW(
+                "Progman",
+                PWSTR {
+                    ..Default::default()
+                },
+            );
 
-                SendMessageTimeoutW(
-                    h_program,
-                    0x52C,
-                    WPARAM {
-                        ..Default::default()
-                    },
-                    LPARAM {
-                        ..Default::default()
-                    },
-                    SMTO_NORMAL,
-                    100,
-                    &mut 0,
-                );
+            SendMessageTimeoutW(
+                h_program,
+                0x52C,
+                WPARAM {
+                    ..Default::default()
+                },
+                LPARAM {
+                    ..Default::default()
+                },
+                SMTO_NORMAL,
+                100,
+                &mut 0,
+            );
 
-                SetParent(h_ffplay, h_program);
+            SetWindowPos(h_ffplay, HWND_TOP, 0, 0, 2560, 1440, SWP_SHOWWINDOW);
+            SetParent(h_ffplay, h_program);
 
-                EnumWindows(
-                    Some(enum_windows_proc),
-                    LPARAM {
-                        ..Default::default()
-                    },
-                );
-            }
+            EnumWindows(
+                Some(enum_windows_proc),
+                LPARAM {
+                    ..Default::default()
+                },
+            );
         }
     }
 }
